@@ -42,7 +42,13 @@ class WikimarkupTestCase(unittest.TestCase):
         """
         text = 'http://mydomain.com/test'
         expected = '<p><a href="http://mydomain.com/test" rel="nofollow">http://mydomain.com/test</a>\n</p>'
-        self.assertEquals(parse(text, nofollow=True), expected)
+        parsed = parse(text, nofollow=True)
+        try:
+            self.assertEquals(parsed, expected)
+        except AssertionError:
+            expected = ('<p><a rel="nofollow" href="http://mydomain.com/test">'
+                        'http://mydomain.com/test</a>\n</p>')
+            self.assertEquals(parsed, expected)
 
     def testStyles(self):
         """
