@@ -42,7 +42,13 @@ class WikimarkupTestCase(unittest.TestCase):
         """
         text = 'http://mydomain.com/test'
         expected = '<p><a href="http://mydomain.com/test" rel="nofollow">http://mydomain.com/test</a>\n</p>'
-        self.assertEquals(parse(text, nofollow=True), expected)
+        parsed = parse(text, nofollow=True)
+        try:
+            self.assertEquals(parsed, expected)
+        except AssertionError:
+            expected = ('<p><a rel="nofollow" href="http://mydomain.com/test">'
+                        'http://mydomain.com/test</a>\n</p>')
+            self.assertEquals(parsed, expected)
 
     def testStyles(self):
         """
@@ -197,6 +203,14 @@ class WikimarkupTestCase(unittest.TestCase):
         assumed = u"<p>\n\n# item '''1'''\nitem ''2''\n\n\n</p>"
 
         self.assertEquals(p.parse(text), assumed)
+
+    def testToc(self):
+        """
+        Test that the table of contents can be configured.
+        """
+        text = """=My Heading=\n* here\n* is\n* a\n* [http://mydomain.com list]\n==Subheading==\n==show me a toc==\n===pretty please==="""
+        assumed = '<div id="toc"><h2>TOC</h2><ul><li class="toclevel-1"><a href="#w_my-heading"><span class="tocnumber">1</span> <span class="toctext">My Heading</span></a><ul><li class="toclevel-2"><a href="#w_subheading"><span class="tocnumber">1.1</span> <span class="toctext">Subheading</span></a></li><li class="toclevel-2"><a href="#w_show-me-a-toc"><span class="tocnumber">1.2</span> <span class="toctext">show me a toc</span></a><ul><li class="toclevel-3"><a href="#w_pretty-please"><span class="tocnumber">1.2.1</span> <span class="toctext">pretty please</span></a></li></ul></li></ul></li></ul></div><h1 id="w_my-heading">My Heading</h1>\n<ul><li> here\n</li><li> is\n</li><li> a\n</li><li> <a href="http://mydomain.com">list</a>\n</li></ul>\n<h2 id="w_subheading">Subheading</h2>\n<h2 id="w_show-me-a-toc">show me a toc</h2>\n<h3 id="w_pretty-please">pretty please</h3>'
+        self.assertEquals(parse(text, toc_string='TOC'), assumed)
 
 
 if __name__ == '__main__':

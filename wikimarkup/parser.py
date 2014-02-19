@@ -1676,7 +1676,7 @@ class Parser(BaseParser):
 
     def parse(self, text, show_toc=True, tags=ALLOWED_TAGS,
               attributes=ALLOWED_ATTRIBUTES, styles=[], nofollow=False,
-              strip_comments=False):
+              strip_comments=False, toc_string='Table of Contents'):
         """Returns HTML from MediaWiki markup"""
         self.show_toc = show_toc
         self.tags = tags
@@ -1700,7 +1700,7 @@ class Parser(BaseParser):
         text = self.replaceExternalLinks(text)
         if not self.show_toc and text.find(u"<!--MWTOC-->") == -1:
             self.show_toc = False
-        text = self.formatHeadings(text, True)
+        text = self.formatHeadings(text, True, toc_string)
         text = self.unstrip(text)
         text = self.fixtags(text)
         text = self.doBlockLevels(text, True)
@@ -2061,7 +2061,7 @@ class Parser(BaseParser):
 
         return text
 
-    def formatHeadings(self, text, isMain):
+    def formatHeadings(self, text, isMain, toc_string):
         """
         This function accomplishes several tasks:
         1) Auto-number headings if that option is enabled
@@ -2265,7 +2265,7 @@ class Parser(BaseParser):
             if toclevel < wgMaxTocLevel:
                 toc.append(u"</li>")
                 toc.append(u"</ul></li>" * max(0, toclevel - 1))
-            toc.insert(0, u'<div id="toc"><h2>Table of Contents</h2>')
+            toc.insert(0, u'<div id="toc"><h2>{0}</h2>'.format(toc_string))
             toc.append(u'</ul></div>')
 
         # split up and insert constructed headlines
@@ -2293,11 +2293,12 @@ class Parser(BaseParser):
             return full
 
 def parse(text, show_toc=True, tags=ALLOWED_TAGS,
-          attributes=ALLOWED_ATTRIBUTES, nofollow=False):
+          attributes=ALLOWED_ATTRIBUTES, nofollow=False,
+          toc_string='Table of Contents'):
     """Returns HTML from MediaWiki markup"""
     p = Parser()
     return p.parse(text, show_toc=show_toc, tags=tags, attributes=attributes,
-                   nofollow=nofollow)
+                   nofollow=nofollow, toc_string=toc_string)
 
 def parselite(text):
     """Returns HTML from MediaWiki markup ignoring
